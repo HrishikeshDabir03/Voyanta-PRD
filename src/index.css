@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-display: "Space Grotesk", sans-serif;
+
+  --color-surface: #0b1326;
+  --color-surface-container: #171f33;
+  --color-surface-container-low: #131b2e;
+  --color-surface-container-high: #222a3d;
+  --color-surface-container-highest: #2d3449;
+  --color-surface-container-lowest: #060e20;
+  
+  --color-primary: #c3c0ff;
+  --color-primary-container: #4f46e5;
+  --color-on-primary: #1d00a5;
+  --color-on-primary-container: #dad7ff;
+  
+  --color-secondary: #c3c0ff;
+  --color-secondary-container: #413f82;
+  
+  --color-tertiary: #ffb695;
+  --color-tertiary-container: #a44100;
+  
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+  
+  --color-on-surface: #dae2fd;
+  --color-on-surface-variant: #c7c4d8;
+  
+  --color-outline: #918fa1;
+  --color-outline-variant: #464555;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-surface text-on-surface font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    background: rgba(45, 52, 73, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .glass-panel-heavy {
+    background: rgba(17, 24, 39, 0.8);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border: 1px solid rgba(195, 192, 255, 0.1);
+  }
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-linear-to-br from-[#c3c0ff] to-[#4f46e5];
+  }
+  .animate-logo-gradient {
+    background: linear-gradient(
+      to right,
+      #c3c0ff,
+      #4f46e5,
+      #ffb695,
+      #c3c0ff
+    );
+    background-size: 300% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: shimmer 8s linear infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 300% center; }
+  }
+  .glow-indigo {
+    box-shadow: 0 0 40px -10px rgba(79, 70, 229, 0.4);
+  }
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  .tricolour-india {
+    background: linear-gradient(
+      to right,
+      #FF9933,
+      #FFFFFF,
+      #138808,
+      #FF9933
+    );
+    background-size: 300% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: tricolour-shimmer 6s linear infinite;
+    display: inline-block;
+    font-weight: 800;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.1));
+  }
+  @keyframes tricolour-shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 300% center; }
+  }
+}
