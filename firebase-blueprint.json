@@ -1,0 +1,56 @@
+{
+  "entities": {
+    "ContactMessage": {
+      "title": "Contact Message",
+      "description": "Message sent via the 'Let's Connect' form.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the person sending the message." },
+        "email": { "type": "string", "format": "email", "description": "Email address of the sender." },
+        "message": { "type": "string", "description": "The message text." },
+        "status": { "type": "string", "enum": ["active", "archived"], "description": "Status of the message." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of when the message was sent." }
+      },
+      "required": ["name", "email", "message", "status", "createdAt"]
+    },
+    "Trip": {
+      "title": "Trip",
+      "description": "A travel itinerary.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "destination": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "confirmed"] },
+        "itinerary": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "destination", "status", "createdAt"]
+    },
+    "User": {
+      "title": "User",
+      "description": "User profile data.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "name": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "name", "createdAt"]
+    }
+  },
+  "firestore": {
+    "contacts": {
+      "schema": "ContactMessage",
+      "description": "Collection to store contact messages."
+    },
+    "trips": {
+      "schema": "Trip",
+      "description": "User itineraries."
+    },
+    "users": {
+      "schema": "User",
+      "description": "Public and private user data."
+    }
+  }
+}

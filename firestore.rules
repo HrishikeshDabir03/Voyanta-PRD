@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+    
+    function isAdmin() {
+      // Bootstrapped admin email from runtime
+      return isEmailVerified() && request.auth.token.email.lower() == 'hrishikesh.dabir333.hd@gmail.com';
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+    
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Validation Blueprints ---
+
+    function isValidContactMessage(data) {
+      return data.keys().hasAll(['name', 'email', 'message', 'status', 'createdAt']) &&
+             data.keys().size() == 5 &&
+             data.name is string && data.name.size() >= 2 && data.name.size() <= 256 &&
+             data.email is string && data.email.size() >= 5 && data.email.size() <= 256 &&
+             data.email.matches('^[^@]+@[^@]+\\.[^@]+$') &&
+             data.message is string && data.message.size() >= 2 && data.message.size() <= 5000 &&
+             data.status in ['active', 'archived'] &&
+             (resource == null ? data.createdAt == request.time : data.createdAt == existing().createdAt);
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'name', 'createdAt']) &&
+             data.keys().size() == 4 &&
+             data.uid == request.auth.uid &&
+             data.email == request.auth.token.email &&
+             (resource == null ? data.createdAt == request.time : data.createdAt == existing().createdAt);
+    }
+
+    function isValidTrip(data) {
+      return data.keys().hasAll(['userId', 'destination', 'status', 'createdAt']) &&
+             // Optional fields can be present if included in the larger schema
+             data.userId == request.auth.uid &&
+             data.status in ['draft', 'confirmed'] &&
+             (resource == null ? data.createdAt == request.time : data.createdAt == existing().createdAt);
+    }
+
+    // --- Collections ---
+
+    match /contacts/{contactId} {
+      // Public contact form allows creation by anyone
+      allow create: if isValidId(contactId) && isValidContactMessage(incoming());
+      // Only admin can read, list, delete, or update (archive) contact messages
+      allow read, list, delete: if isAdmin();
+      allow update: if isAdmin() && isValidContactMessage(incoming()) &&
+                    incoming().diff(existing()).affectedKeys().hasOnly(['status']);
+    }
+
+    match /users/{userId} {
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow read: if isOwner(userId) || isAdmin();
+      allow update: if isOwner(userId) && isValidUser(incoming()) && 
+                    incoming().diff(existing()).affectedKeys().hasOnly(['name']);
+    }
+
+    match /trips/{tripId} {
+      allow create: if isValidId(tripId) && isValidTrip(incoming());
+      allow read: if isOwner(existing().userId) || isAdmin();
+      // Secure list query
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update: if isOwner(existing().userId) && isValidTrip(incoming()) &&
+                    // Only certain fields can change
+                    incoming().diff(existing()).affectedKeys().hasOnly(['destination', 'status', 'itinerary']);
+      allow delete: if isOwner(existing().userId);
+    }
+  }
+}
